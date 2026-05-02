@@ -100,7 +100,7 @@ export default function BrowsePapersPage() {
                     {semesterFilter !== 'all' ? formatSemester(semesterFilter) : 'All Semesters'}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="glass-heavy border-white/10 rounded-xl">
+                <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
                   <SelectItem value="all">All Semesters</SelectItem>
                   {[1,2,3,4,5,6,7,8].map(s => (
                     <SelectItem key={s} value={`${s}th Semester`}>
@@ -114,7 +114,7 @@ export default function BrowsePapersPage() {
                 <SelectTrigger className="bg-black/40 border-white/10 h-12 rounded-xl w-[160px]">
                   <SelectValue placeholder="Exam Type" />
                 </SelectTrigger>
-                <SelectContent className="glass-heavy border-white/10 rounded-xl">
+                <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
                   <SelectItem value="all">All Exams</SelectItem>
                   <SelectItem value="Mid-Semester">Mid-Semester</SelectItem>
                   <SelectItem value="End-Semester">End-Semester</SelectItem>
@@ -125,7 +125,7 @@ export default function BrowsePapersPage() {
                 <SelectTrigger className="bg-black/40 border-white/10 h-12 rounded-xl w-[140px]">
                   <SelectValue placeholder="Year" />
                 </SelectTrigger>
-                <SelectContent className="glass-heavy border-white/10 rounded-xl">
+                <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
                   <SelectItem value="all">All Years</SelectItem>
                   {uniqueYears.map(y => <SelectItem key={y as string} value={y as string}>{y as string}</SelectItem>)}
                 </SelectContent>

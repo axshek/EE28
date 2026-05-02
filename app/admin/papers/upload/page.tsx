@@ -17,7 +17,7 @@ export default function UploadPaperPage() {
   
   const [subjectName, setSubjectName] = useState('')
   const [subjectCode, setSubjectCode] = useState('')
-  const [semester, setSemester] = useState('1th Semester')
+  const [semester, setSemester] = useState('1st Semester')
   const [year, setYear] = useState(new Date().getFullYear().toString())
   const [examType, setExamType] = useState('Mid-Semester')
   const [file, setFile] = useState<File | null>(null)
@@ -40,7 +40,7 @@ export default function UploadPaperPage() {
         
         setSubjectName('')
         setSubjectCode('')
-        setSemester('1th Semester')
+        setSemester('1st Semester')
         setYear(new Date().getFullYear().toString())
         setExamType('Mid-Semester')
         setFile(null)
@@ -97,8 +97,10 @@ export default function UploadPaperPage() {
                     <SelectTrigger className="bg-black/40 border-white/10 focus:ring-accent h-12 rounded-xl px-4 transition-all">
                       <SelectValue placeholder="Select Semester" />
                     </SelectTrigger>
-                    <SelectContent className="glass-heavy border-white/10 rounded-xl">
-                      {[1,2,3,4,5,6,7,8].map(s => <SelectItem key={s} value={`${s}th Semester`}>{formatSemester(`${s}th Semester`)}</SelectItem>)}
+                    <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
+                      {['1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'].map(s => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -109,7 +111,7 @@ export default function UploadPaperPage() {
                     <SelectTrigger className="bg-black/40 border-white/10 focus:ring-accent h-12 rounded-xl px-4 transition-all">
                       <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
-                    <SelectContent className="glass-heavy border-white/10 rounded-xl">
+                    <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
                       {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(y => (
                         <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
                       ))}
@@ -123,7 +125,7 @@ export default function UploadPaperPage() {
                     <SelectTrigger className="bg-black/40 border-white/10 focus:ring-accent h-12 rounded-xl px-4 transition-all">
                       <SelectValue placeholder="Select Exam Type" />
                     </SelectTrigger>
-                    <SelectContent className="glass-heavy border-white/10 rounded-xl">
+                    <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
                       <SelectItem value="Mid-Semester">Mid-Semester</SelectItem>
                       <SelectItem value="End-Semester">End-Semester</SelectItem>
                     </SelectContent>

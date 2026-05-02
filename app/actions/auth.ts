@@ -39,7 +39,7 @@ export async function adminLogin(formData: FormData) {
 
   // Step 2: Check role from database (source of truth)
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')

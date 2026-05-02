@@ -1,9 +1,38 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+@font-face {
+  font-family: 'SF Pro Display';
+  src: local('-apple-system'),
+    local('BlinkMacSystemFont'),
+    local('SF Pro Display');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+/* Apply globally */
+html,
+body {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+    'Helvetica Neue', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button, 
+a, 
+[role="button"] {
+  cursor: pointer !important;
+}
+
+.btn-smooth {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 @layer base {
   :root {
-    --background: 240 10% 3.9%; /* Deep OLED Black */
+    --background: 240 10% 3.9%;
+    /* Deep OLED Black */
     --foreground: 0 0% 98%;
 
     --card: 240 10% 3.9%;
@@ -12,7 +41,8 @@
     --popover: 240 10% 3.9%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 210 100% 52%; /* Apple Electric Blue #0A84FF */
+    --primary: 210 100% 52%;
+    /* Apple Electric Blue #0A84FF */
     --primary-foreground: 0 0% 100%;
 
     --secondary: 240 3.7% 15.9%;
@@ -21,7 +51,8 @@
     --muted: 240 3.7% 15.9%;
     --muted-foreground: 240 5% 64.9%;
 
-    --accent: 49 100% 52%; /* Gold #FFD60A */
+    --accent: 49 100% 52%;
+    /* Gold #FFD60A */
     --accent-foreground: 240 5.9% 10%;
 
     --destructive: 0 84.2% 60.2%;
@@ -29,10 +60,11 @@
 
     --border: 240 3.7% 15.9%;
     --input: 240 3.7% 15.9%;
-    --ring: 210 100% 52%; /* Apple blue ring */
+    --ring: 210 100% 52%;
+    /* Apple blue ring */
 
     --radius: 1rem;
-    
+
     --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 }
@@ -41,15 +73,20 @@
   * {
     border-color: hsl(var(--border));
   }
+
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans);
     background-color: #000000;
     min-height: 100vh;
     letter-spacing: -0.01em;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 300;
     letter-spacing: -0.02em;
   }
@@ -66,7 +103,7 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
-  
+
   .glass-heavy {
     background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(40px);
@@ -80,7 +117,7 @@
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .text-gold-gradient {
     background: linear-gradient(135deg, #FFD60A, #ccaa00);
     -webkit-background-clip: text;
@@ -118,8 +155,59 @@
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Dropdown fix - solid background */
+[data-radix-popper-content-wrapper] {
+  z-index: 100 !important;
+}
+
+[data-radix-select-content] {
+  background: #0f1117 !important;
+  backdrop-filter: none !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-radix-select-item] {
+  transition: background 150ms ease;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background: rgba(59, 130, 246, 0.12) !important;
+  color: white !important;
+}
+
+[data-radix-select-item][data-state="checked"] {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #60a5fa !important;
+}
+
+.btn-outline:hover,
+[variant="outline"]:hover {
+  background-color: rgba(255,255,255,0.08) !important;
+  color: white !important;
+}
+
+/* Fix shadcn outline button hover specifically */
+.border.border-input:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: white !important;
+}
+
+/* Global guard — prevent any button/interactive element from turning text black on hover */
+button:hover,
+[role="button"]:hover {
+  color: inherit;
+}
+
+/* Prevent bg-accent / text-accent-foreground from bleeding black text on dark theme */
+button[class*="hover:text-accent-foreground"]:hover,
+a[class*="hover:text-accent-foreground"]:hover {
+  color: white !important;
 }

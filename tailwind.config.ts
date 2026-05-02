@@ -18,6 +18,15 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: [
+          'SF Pro Display',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Helvetica Neue',
+          'sans-serif'
+        ],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

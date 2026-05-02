@@ -6,38 +6,39 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { motion, useScroll, useTransform } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null)
   const supabase = createClient()
+  const router = useRouter()
   const { scrollY } = useScroll()
-  
+
   // Apple-style navbar compression on scroll
   const navHeight = useTransform(scrollY, [0, 100], [80, 60])
   const navBackground = useTransform(scrollY, [0, 100], ['rgba(0,0,0,0)', 'rgba(0,0,0,0.6)'])
   const navBorder = useTransform(scrollY, [0, 100], ['rgba(255,255,255,0)', 'rgba(255,255,255,0.08)'])
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    getUser()
-
+    // onAuthStateChange handles the initial session check AND subsequent changes.
+    // This prevents the "stolen lock" error by keeping auth requests serialized.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null)
     })
 
-    return () => subscription.unsubscribe()
-  }, [])
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [supabase.auth])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    window.location.href = '/'
+    router.push('/')
+    router.refresh() // Ensures the server components sync with the logged-out state
   }
 
   return (
-    <motion.nav 
+    <motion.nav
       style={{
         height: navHeight,
         background: navBackground,
@@ -66,7 +67,11 @@ export default function Navbar() {
               <Link href="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                 Dashboard
               </Link>
-              <Button onClick={handleLogout} variant="outline" className="rounded-full glass text-foreground border-white/10 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
+              <Button 
+                onClick={handleLogout} 
+                variant="outline" 
+                className="rounded-full glass text-foreground border-white/10 hover:bg-white/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
                 Logout
               </Button>
             </>

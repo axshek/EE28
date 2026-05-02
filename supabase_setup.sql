@@ -6,6 +6,7 @@ CREATE TABLE public.profiles (
     full_name TEXT NOT NULL,
     roll_number TEXT,
     semester TEXT,
+    linkedin TEXT DEFAULT '',
     role TEXT DEFAULT 'student',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -80,12 +81,13 @@ USING (
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 BEGIN
-  INSERT INTO public.profiles (id, full_name, roll_number, semester, role)
+  INSERT INTO public.profiles (id, full_name, roll_number, semester, linkedin, role)
   VALUES (
     new.id, 
     new.raw_user_meta_data->>'full_name', 
     new.raw_user_meta_data->>'roll_number', 
     new.raw_user_meta_data->>'semester',
+    new.raw_user_meta_data->>'linkedin',
     COALESCE(new.raw_user_meta_data->>'role', 'student')
   );
   RETURN new;

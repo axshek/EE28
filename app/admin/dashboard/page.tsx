@@ -7,10 +7,15 @@ import { formatSemester } from '@/lib/utils'
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
 
-  const { count: usersCount } = await supabase
+  const { count: studentCount } = await supabase
     .from('profiles')
     .select('*', { count: 'exact', head: true })
     .eq('role', 'student')
+
+  const { count: adminCount } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('role', 'admin')
 
   const { count: papersCount } = await supabase
     .from('question_papers')
@@ -38,9 +43,9 @@ export default async function AdminDashboardPage() {
               <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]">
                 <Users size={24} />
               </div>
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">Total Students</div>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold">TOTAL STUDENTS</div>
             </div>
-            <div className="text-5xl font-light tracking-tighter text-white">{usersCount || 0}</div>
+            <div className="text-5xl font-light tracking-tighter text-white">{studentCount ?? 0}</div>
           </HoverCard>
         </FadeIn>
 
