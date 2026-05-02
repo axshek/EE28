@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { formatSemester } from '@/lib/utils'
 
 export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null)
@@ -71,7 +72,7 @@ export default function RegisterPage() {
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent className="glass-heavy border-white/10 text-foreground rounded-xl">
-                      {[1,2,3,4,5,6,7,8].map(s => <SelectItem key={s} value={`${s}th Semester`} className="rounded-lg focus:bg-white/10">{s}th Semester</SelectItem>)}
+                      {[1,2,3,4,5,6,7,8].map(s => <SelectItem key={s} value={`${s}th Semester`} className="rounded-lg focus:bg-white/10">{formatSemester(`${s}th Semester`)}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

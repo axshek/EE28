@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatSemester } from '@/lib/utils'
 
 export default function ManagePapersPage() {
   const [papers, setPapers] = useState<any[]>([])
@@ -105,7 +106,7 @@ export default function ManagePapersPage() {
                       <td className="py-5 px-6">
                         <Badge variant="outline" className="border-accent/30 text-accent bg-accent/10 rounded-full px-2 py-0.5 font-mono font-medium">{paper.subject_code}</Badge>
                       </td>
-                      <td className="py-5 px-6 text-muted-foreground">{paper.semester}</td>
+                      <td className="py-5 px-6 text-muted-foreground">{formatSemester(paper.semester)}</td>
                       <td className="py-5 px-6 text-muted-foreground">{paper.year}</td>
                       <td className="py-5 px-6">
                         <Badge variant="secondary" className="glass bg-white/5 font-normal text-muted-foreground border-transparent">{paper.exam_type}</Badge>

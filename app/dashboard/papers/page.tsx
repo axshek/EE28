@@ -10,20 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
-
-const formatSemester = (val: string) => {
-  const map: Record<string, string> = {
-    '1th Semester': '1st Semester',
-    '2th Semester': '2nd Semester', 
-    '3th Semester': '3rd Semester',
-    '4th Semester': '4th Semester',
-    '5th Semester': '5th Semester',
-    '6th Semester': '6th Semester',
-    '7th Semester': '7th Semester',
-    '8th Semester': '8th Semester',
-  }
-  return map[val] || val
-}
+import { formatSemester } from '@/lib/utils'
 
 export default function BrowsePapersPage() {
   const [papers, setPapers] = useState<any[]>([])
@@ -115,20 +102,11 @@ export default function BrowsePapersPage() {
                 </SelectTrigger>
                 <SelectContent className="glass-heavy border-white/10 rounded-xl">
                   <SelectItem value="all">All Semesters</SelectItem>
-                  {[1,2,3,4,5,6,7,8].map(s => {
-                    const getOrdinal = (n: number) => {
-                      if (n === 1) return '1st'
-                      if (n === 2) return '2nd'
-                      if (n === 3) return '3rd'
-                      return `${n}th`
-                    }
-                    const label = `${getOrdinal(s)} Semester`
-                    return (
-                      <SelectItem key={s} value={`${s}th Semester`}>
-                        {label}
-                      </SelectItem>
-                    )
-                  })}
+                  {[1,2,3,4,5,6,7,8].map(s => (
+                    <SelectItem key={s} value={`${s}th Semester`}>
+                      {formatSemester(`${s}th Semester`)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
 
@@ -186,7 +164,7 @@ export default function BrowsePapersPage() {
                 <h3 className="text-xl font-medium mb-4 flex-1 text-white">{paper.subject_name}</h3>
                 
                 <div className="flex flex-wrap gap-2 mb-6">
-                  <Badge variant="secondary" className="glass bg-white/5 font-normal hover:bg-white/10 text-muted-foreground">{paper.semester}</Badge>
+                  <Badge variant="secondary" className="glass bg-white/5 font-normal hover:bg-white/10 text-muted-foreground">{formatSemester(paper.semester)}</Badge>
                   <Badge variant="secondary" className="glass bg-white/5 font-normal hover:bg-white/10 text-muted-foreground">{paper.year}</Badge>
                   <Badge variant="secondary" className="glass bg-white/5 font-normal hover:bg-white/10 text-muted-foreground">{paper.exam_type}</Badge>
                 </div>

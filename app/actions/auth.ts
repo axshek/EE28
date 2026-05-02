@@ -31,18 +31,28 @@ export async function adminLogin(formData: FormData) {
     password: formData.get('password') as string,
   }
 
-  // Basic check for admin email format/allowlist
-  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim()) || [];
-  if (!adminEmails.includes(data.email.trim())) {
-    return { error: "Access denied. You are not an authorized administrator." }
-  }
-
+  // Step 1: Sign in first
   const { error } = await supabase.auth.signInWithPassword(data)
-
   if (error) {
     return { error: error.message }
   }
 
+  // Step 2: Check role from database (source of truth)
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user?.id)
+    .single()
+
+  // Step 3: If not admin, sign out and deny access
+  if (profile?.role !== 'admin') {
+    await supabase.auth.signOut()
+    return { error: "Access denied. You are not an authorized administrator." }
+  }
+
+  // Step 4: Redirect to admin dashboard
   redirect('/admin/dashboard')
 }
 

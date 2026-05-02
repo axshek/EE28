@@ -7,6 +7,7 @@ import { PageTransition, FadeIn } from '@/components/animations/PageTransition'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { formatSemester } from '@/lib/utils'
 
 export default function ManageUsersPage() {
   const [users, setUsers] = useState<any[]>([])
@@ -94,7 +95,7 @@ export default function ManageUsersPage() {
                       <td className="py-5 px-6">
                         <span className="font-mono text-muted-foreground">{user.roll_number || '-'}</span>
                       </td>
-                      <td className="py-5 px-6 text-muted-foreground">{user.semester || '-'}</td>
+                      <td className="py-5 px-6 text-muted-foreground">{user.semester ? formatSemester(user.semester) : '-'}</td>
                       <td className="py-5 px-6">
                         <Badge variant="outline" className={`rounded-full px-3 py-1 text-[10px] uppercase tracking-widest font-semibold border-transparent ${
                           user.role === 'admin' 

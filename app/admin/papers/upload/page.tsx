@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
+import { formatSemester } from '@/lib/utils'
 
 export default function UploadPaperPage() {
   const [loading, setLoading] = useState(false)
@@ -97,7 +98,7 @@ export default function UploadPaperPage() {
                       <SelectValue placeholder="Select Semester" />
                     </SelectTrigger>
                     <SelectContent className="glass-heavy border-white/10 rounded-xl">
-                      {[1,2,3,4,5,6,7,8].map(s => <SelectItem key={s} value={`${s}th Semester`}>{s}th Semester</SelectItem>)}
+                      {[1,2,3,4,5,6,7,8].map(s => <SelectItem key={s} value={`${s}th Semester`}>{formatSemester(`${s}th Semester`)}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>

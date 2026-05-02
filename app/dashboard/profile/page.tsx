@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { User, Mail, Hash, Book } from 'lucide-react'
 import { PageTransition, FadeIn, HoverCard } from '@/components/animations/PageTransition'
 import { Badge } from '@/components/ui/badge'
+import { formatSemester } from '@/lib/utils'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -59,7 +60,7 @@ export default async function ProfilePage() {
                 </div>
                 <div>
                   <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-1">Current Semester</div>
-                  <div className="font-medium text-white">{profile?.semester}</div>
+                  <div className="font-medium text-white">{profile?.semester ? formatSemester(profile.semester) : ''}</div>
                 </div>
               </HoverCard>
             </div>

@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { Users, FileText, Activity, ArrowRight } from 'lucide-react'
 import { PageTransition, FadeIn, HoverCard } from '@/components/animations/PageTransition'
 import { Badge } from '@/components/ui/badge'
+import { formatSemester } from '@/lib/utils'
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -94,7 +95,7 @@ export default async function AdminDashboardPage() {
                     <tr key={paper.id} className={`border-b border-white/5 hover:bg-white/5 transition-colors ${idx === recentPapers.length - 1 ? 'border-none' : ''}`}>
                       <td className="py-4 px-6 text-white font-medium">{paper.subject_name}</td>
                       <td className="py-4 px-6"><Badge variant="outline" className="border-accent/30 text-accent bg-accent/10 rounded-full px-2 py-0.5 font-mono font-medium">{paper.subject_code}</Badge></td>
-                      <td className="py-4 px-6 text-muted-foreground">{paper.semester}</td>
+                      <td className="py-4 px-6 text-muted-foreground">{formatSemester(paper.semester)}</td>
                       <td className="py-4 px-6 text-muted-foreground">{paper.year}</td>
                       <td className="py-4 px-6 text-muted-foreground">{new Date(paper.created_at).toLocaleDateString()}</td>
                     </tr>

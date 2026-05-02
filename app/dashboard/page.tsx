@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { BookOpen, User, ArrowRight } from 'lucide-react'
 import { PageTransition, FadeIn, HoverCard } from '@/components/animations/PageTransition'
+import { formatSemester } from '@/lib/utils'
 
 import Greeting from '@/components/Greeting'
 
@@ -86,7 +87,7 @@ export default async function StudentDashboardPage() {
                     <div className="text-[10px] uppercase tracking-widest text-primary font-semibold mb-2">{paper.subject_code}</div>
                     <h3 className="font-medium text-white mb-4 truncate text-lg" title={paper.subject_name}>{paper.subject_name}</h3>
                     <div className="flex flex-wrap gap-2 text-xs font-medium text-muted-foreground">
-                      <span className="glass px-3 py-1.5 rounded-full">{paper.semester}</span>
+                      <span className="glass px-3 py-1.5 rounded-full">{formatSemester(paper.semester)}</span>
                       <span className="glass px-3 py-1.5 rounded-full">{paper.year}</span>
                       <span className="glass px-3 py-1.5 rounded-full">{paper.exam_type}</span>
                     </div>
