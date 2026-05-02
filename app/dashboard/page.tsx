@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { BookOpen, User, ArrowRight } from 'lucide-react'
 import { PageTransition, FadeIn, HoverCard } from '@/components/animations/PageTransition'
 
+import Greeting from '@/components/Greeting'
+
 export default async function StudentDashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -24,7 +26,9 @@ export default async function StudentDashboardPage() {
     <PageTransition>
       <div className="mb-10">
         <FadeIn delay={0.1}>
-          <h1 className="text-4xl font-light tracking-tight text-white mb-2">Good evening, {profile?.full_name?.split(' ')[0] || 'Student'} 👋</h1>
+          <h1 className="text-4xl font-light tracking-tight text-white mb-2">
+            <Greeting name={profile?.full_name?.split(' ')[0] || 'Student'} />
+          </h1>
           <p className="text-muted-foreground font-light text-lg">Here's your academic overview for today.</p>
         </FadeIn>
       </div>

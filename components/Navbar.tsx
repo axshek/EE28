@@ -50,7 +50,7 @@ export default function Navbar() {
       className="fixed top-0 left-0 right-0 z-50 flex items-center transition-all duration-300"
     >
       <div className="container flex justify-between items-center w-full">
-        <Link href="/" className="flex items-center gap-3 group">
+        <Link href="/" className="flex items-center gap-3 group ml-14 lg:ml-0">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] group-hover:bg-white/20 transition-colors">
             <GraduationCap className="text-white" size={24} strokeWidth={1.5} />
           </div>
