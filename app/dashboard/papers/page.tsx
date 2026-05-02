@@ -11,6 +11,20 @@ import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 
+const formatSemester = (val: string) => {
+  const map: Record<string, string> = {
+    '1th Semester': '1st Semester',
+    '2th Semester': '2nd Semester', 
+    '3th Semester': '3rd Semester',
+    '4th Semester': '4th Semester',
+    '5th Semester': '5th Semester',
+    '6th Semester': '6th Semester',
+    '7th Semester': '7th Semester',
+    '8th Semester': '8th Semester',
+  }
+  return map[val] || val
+}
+
 export default function BrowsePapersPage() {
   const [papers, setPapers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -95,11 +109,26 @@ export default function BrowsePapersPage() {
             <div className="flex gap-4 flex-wrap md:flex-nowrap">
               <Select value={semesterFilter} onValueChange={setSemesterFilter}>
                 <SelectTrigger className="bg-black/40 border-white/10 h-12 rounded-xl w-[160px]">
-                  <SelectValue placeholder="Semester" />
+                  <SelectValue placeholder="All Semesters">
+                    {semesterFilter !== 'all' ? formatSemester(semesterFilter) : 'All Semesters'}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="glass-heavy border-white/10 rounded-xl">
                   <SelectItem value="all">All Semesters</SelectItem>
-                  {[1,2,3,4,5,6,7,8].map(s => <SelectItem key={s} value={`${s}th Semester`}>{s}th Semester</SelectItem>)}
+                  {[1,2,3,4,5,6,7,8].map(s => {
+                    const getOrdinal = (n: number) => {
+                      if (n === 1) return '1st'
+                      if (n === 2) return '2nd'
+                      if (n === 3) return '3rd'
+                      return `${n}th`
+                    }
+                    const label = `${getOrdinal(s)} Semester`
+                    return (
+                      <SelectItem key={s} value={`${s}th Semester`}>
+                        {label}
+                      </SelectItem>
+                    )
+                  })}
                 </SelectContent>
               </Select>
 

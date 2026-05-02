@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { uploadPaper } from '@/app/actions/papers'
 import { UploadCloud, CheckCircle2, AlertCircle } from 'lucide-react'
 import { PageTransition, FadeIn } from '@/components/animations/PageTransition'
@@ -13,6 +13,15 @@ export default function UploadPaperPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
   const [dragActive, setDragActive] = useState(false)
+  
+  const [subjectName, setSubjectName] = useState('')
+  const [subjectCode, setSubjectCode] = useState('')
+  const [semester, setSemester] = useState('1th Semester')
+  const [year, setYear] = useState(new Date().getFullYear().toString())
+  const [examType, setExamType] = useState('Mid-Semester')
+  const [file, setFile] = useState<File | null>(null)
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -27,7 +36,17 @@ export default function UploadPaperPage() {
         setMessage({ type: 'error', text: result.error })
       } else if (result?.success) {
         setMessage({ type: 'success', text: 'Question paper uploaded successfully!' })
-        ;(e.target as HTMLFormElement).reset()
+        
+        setSubjectName('')
+        setSubjectCode('')
+        setSemester('1th Semester')
+        setYear(new Date().getFullYear().toString())
+        setExamType('Mid-Semester')
+        setFile(null)
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'An unexpected error occurred.' })
@@ -63,17 +82,17 @@ export default function UploadPaperPage() {
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="subject_name" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">Subject Name</Label>
-                  <Input id="subject_name" name="subject_name" type="text" className="bg-black/40 border-white/10 focus-visible:ring-accent h-12 rounded-xl px-4 transition-all" placeholder="e.g. Basic Electrical Engineering" required />
+                  <Input id="subject_name" name="subject_name" type="text" value={subjectName} onChange={(e) => setSubjectName(e.target.value)} className="bg-black/40 border-white/10 focus-visible:ring-accent h-12 rounded-xl px-4 transition-all" placeholder="e.g. Basic Electrical Engineering" required />
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="subject_code" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">Subject Code</Label>
-                  <Input id="subject_code" name="subject_code" type="text" className="bg-black/40 border-white/10 focus-visible:ring-accent h-12 rounded-xl px-4 transition-all font-mono" placeholder="e.g. EE101" required />
+                  <Input id="subject_code" name="subject_code" type="text" value={subjectCode} onChange={(e) => setSubjectCode(e.target.value)} className="bg-black/40 border-white/10 focus-visible:ring-accent h-12 rounded-xl px-4 transition-all font-mono" placeholder="e.g. EE101" required />
                 </div>
                 
                 <div className="space-y-2 flex flex-col">
                   <Label htmlFor="semester" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">Semester</Label>
-                  <Select name="semester" required>
+                  <Select name="semester" value={semester} onValueChange={setSemester} required>
                     <SelectTrigger className="bg-black/40 border-white/10 focus:ring-accent h-12 rounded-xl px-4 transition-all">
                       <SelectValue placeholder="Select Semester" />
                     </SelectTrigger>
@@ -85,7 +104,7 @@ export default function UploadPaperPage() {
                 
                 <div className="space-y-2 flex flex-col">
                   <Label htmlFor="year" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">Year</Label>
-                  <Select name="year" required>
+                  <Select name="year" value={year} onValueChange={setYear} required>
                     <SelectTrigger className="bg-black/40 border-white/10 focus:ring-accent h-12 rounded-xl px-4 transition-all">
                       <SelectValue placeholder="Select Year" />
                     </SelectTrigger>
@@ -99,7 +118,7 @@ export default function UploadPaperPage() {
                 
                 <div className="space-y-2 flex flex-col md:col-span-2">
                   <Label htmlFor="exam_type" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">Exam Type</Label>
-                  <Select name="exam_type" required>
+                  <Select name="exam_type" value={examType} onValueChange={setExamType} required>
                     <SelectTrigger className="bg-black/40 border-white/10 focus:ring-accent h-12 rounded-xl px-4 transition-all">
                       <SelectValue placeholder="Select Exam Type" />
                     </SelectTrigger>
@@ -130,6 +149,8 @@ export default function UploadPaperPage() {
                   type="file" 
                   accept="application/pdf"
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  ref={fileInputRef}
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
                   required 
                 />
               </div>
