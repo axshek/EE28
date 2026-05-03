@@ -1,7 +1,7 @@
 'use client';
 
 import { BookOpen, Lock, Search } from 'lucide-react'
-import PikachuAntigravity from '@/components/PikachuAntigravity'
+import PikachuAntigravity from '../components/PikachuAntigravity'
 
 const FONT_STACK = "-apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif";
 
