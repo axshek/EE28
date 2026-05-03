@@ -37,7 +37,7 @@ export default function LoginPage() {
           <div className="glass-heavy p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
             {/* Inner subtle glow */}
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-            
+
             <div className="flex flex-col items-center mb-8">
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] mb-4">
                 <GraduationCap className="text-white" size={32} strokeWidth={1.5} />
@@ -55,25 +55,25 @@ export default function LoginPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">University Email</Label>
-                <Input 
-                  id="email" 
-                  name="email" 
-                  type="email" 
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
                   placeholder="name@tezu.ac.in"
                   className="bg-black/40 border-white/10 focus-visible:ring-primary h-12 rounded-xl px-4 transition-all"
-                  required 
+                  required
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-muted-foreground font-normal text-xs uppercase tracking-wider">Password</Label>
-                <Input 
-                  id="password" 
-                  name="password" 
-                  type="password" 
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
                   placeholder="••••••••"
                   className="bg-black/40 border-white/10 focus-visible:ring-primary h-12 rounded-xl px-4 transition-all"
-                  required 
+                  required
                 />
               </div>
 

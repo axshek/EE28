@@ -7,7 +7,7 @@ import Link from "next/link";
 const FRAME_COUNT = 66;
 const SCROLL_HEIGHT = 6000; 
 const LERP = 0.1;
-const FRAME_PATH = (n: number) => `/images/frame-${String(n).padStart(3, "0")}.png`;
+const FRAME_PATH = (n: number) => `/frames/frame_${String(n).padStart(3, "0")}.png`;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function PikachuAntigravity() {
@@ -227,6 +227,23 @@ export default function PikachuAntigravity() {
             <div className="cta-group">
               <Link href="/register" className="btn btn-primary">Create Account</Link>
               <Link href="/login" className="btn btn-secondary">Sign In</Link>
+            </div>
+            <div style={{ marginTop: '20px', opacity: 0.4 }}>
+              <Link 
+                href="/admin-login" 
+                style={{ 
+                  fontFamily: "-apple-system, 'SF Pro Text', system-ui, sans-serif",
+                  fontSize: '11px',
+                  color: 'white',
+                  textDecoration: 'none',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  pointerEvents: 'auto'
+                }}
+                className="hover:text-accent transition-colors"
+              >
+                — Admin Portal
+              </Link>
             </div>
           </div>
         </div>
