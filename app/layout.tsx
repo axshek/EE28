@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
   title: 'TU EE Portal | Tezpur University',
-  description: 'Secure academic portal for the Department of Electrical Engineering, Tezpur University, for accessing previous year question papers.',
+  description: 'Secure academic portal for the Department of Electrical Engineering, Tezpur University.',
 }
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ margin: 0, background: '#080808' }}>
         <Navbar />
         {children}
       </body>
