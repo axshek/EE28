@@ -19,6 +19,7 @@ export default function PikachuAntigravity() {
   const bitmapsRef = useRef<(ImageBitmap | null)[]>(new Array(FRAME_COUNT).fill(null));
   const targetFrameRef = useRef(0);
   const currentFrameRef = useRef(0);
+  const scrollYRef = useRef(0);
   const rafRef = useRef<number | null>(null);
   const isLoadedRef = useRef(false);
 
@@ -85,11 +86,29 @@ export default function PikachuAntigravity() {
 
     // ── Layer 2: Decoupled RAF loop ──
     function animate() {
-      const delta = targetFrameRef.current - currentFrameRef.current;
-
-      if (Math.abs(delta) > 0.01) {
-        currentFrameRef.current += delta * LERP;
+      // 1. Frame Interpolation
+      const frameDelta = targetFrameRef.current - currentFrameRef.current;
+      if (Math.abs(frameDelta) > 0.01) {
+        currentFrameRef.current += frameDelta * LERP;
         drawFrame(Math.round(currentFrameRef.current));
+      }
+
+      // 2. DOM Animation Interpolation
+      const scrollY = scrollYRef.current;
+      const fade = Math.max(0, 1 - scrollY / 800);
+      const transform = scrollY * 0.3;
+
+      const heroEl = document.getElementById("hero-text-container");
+      const memeEl = document.getElementById("meme-scroll-container");
+
+      if (heroEl) {
+        heroEl.style.opacity = String(fade);
+        heroEl.style.transform = `translate3d(0, -${transform}px, 0)`;
+      }
+
+      if (memeEl) {
+        memeEl.style.opacity = String(fade);
+        memeEl.style.transform = `translate3d(0, -${transform}px, 0)`;
       }
 
       rafRef.current = requestAnimationFrame(animate);
@@ -129,26 +148,11 @@ export default function PikachuAntigravity() {
     // ── Layer 3: Optimized Scroll Handler ──
     function onScroll() {
       const scrollY = window.scrollY;
+      scrollYRef.current = scrollY;
+
       const maxScroll = SCROLL_HEIGHT - window.innerHeight;
       const progress = Math.max(0, Math.min(scrollY / maxScroll, 1));
-
       targetFrameRef.current = progress * (FRAME_COUNT - 1);
-
-      const heroEl = document.getElementById("hero-text-container");
-      const memeEl = document.getElementById("meme-scroll-container");
-      
-      const fade = Math.max(0, 1 - scrollY / 800);
-      const transform = scrollY * 0.3;
-
-      if (heroEl) {
-        heroEl.style.opacity = String(fade);
-        heroEl.style.transform = `translateY(-${transform}px)`;
-      }
-
-      if (memeEl) {
-        memeEl.style.opacity = String(fade);
-        memeEl.style.transform = `translateY(-${transform}px)`;
-      }
     }
 
     function resize() {
@@ -203,6 +207,7 @@ export default function PikachuAntigravity() {
             height: "100%",
             display: "block",
             willChange: "contents",
+            transform: "translateZ(0)",
           }}
         />
 
@@ -230,6 +235,7 @@ export default function PikachuAntigravity() {
             justifyContent: "center",
             pointerEvents: "none",
             willChange: "transform, opacity",
+            transform: "translate3d(0,0,0)",
           }}
         >
           <div className="hero-content">
@@ -280,8 +286,12 @@ export default function PikachuAntigravity() {
               target="_blank" 
               rel="noopener noreferrer"
               className="meme-floating-icon"
+              style={{ transform: "translateZ(0)" }}
             >
-              <img src="/images/meme-page.jpg" alt="Tezu Electrical Instagram" />
+              <picture>
+                <source srcSet="/images/meme-page.webp" type="image/webp" />
+                <img src="/images/meme-page.jpg" alt="Tezu Electrical Instagram" />
+              </picture>
             </a>
             <div className="meme-popup-panel">
               <span className="meme-text">MEME PAGE</span>
