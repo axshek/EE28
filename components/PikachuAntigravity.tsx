@@ -7,7 +7,8 @@ import Link from "next/link";
 const FRAME_COUNT = 66;
 const SCROLL_HEIGHT = 6000; 
 const LERP = 0.1;
-const FRAME_PATH = (n: number) => `/frames/frame_${String(n).padStart(3, "0")}.png`;
+const PRIORITY_FRAMES = 10; // Load first 10 frames immediately
+const FRAME_PATH = (n: number) => `/frames/frame_${String(n).padStart(3, "0")}.webp`;
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function PikachuAntigravity() {
@@ -23,50 +24,38 @@ export default function PikachuAntigravity() {
 
   // ── Loading UI State ──
   const [loadProgress, setLoadProgress] = useState(0);
+  const [isInitiallyLoaded, setIsInitiallyLoaded] = useState(false);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // alpha: false for faster compositing
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) return;
 
-    // ── Layer 1: Off-thread decoding pipeline ──
+    // ── Layer 1: Optimized decoding pipeline ──
     async function loadFrames() {
-      const dpr = window.devicePixelRatio || 1;
-      const targetWidth = window.innerWidth * dpr;
-      const targetHeight = window.innerHeight * dpr;
-
-      const batchSize = 10;
       let loadedCount = 0;
 
-      for (let i = 0; i < FRAME_COUNT; i += batchSize) {
-        const batch = [];
-        for (let j = i; j < Math.min(i + batchSize, FRAME_COUNT); j++) {
-          batch.push((async (index) => {
-            try {
-              const response = await fetch(FRAME_PATH(index + 1));
-              const blob = await response.blob();
+      // Phase 1: Load Priority Frames (0-9)
+      const priorityBatch = [];
+      for (let i = 0; i < PRIORITY_FRAMES; i++) {
+        priorityBatch.push(loadSingleFrame(i));
+      }
+      await Promise.all(priorityBatch);
+      setIsInitiallyLoaded(true);
 
-              // createImageBitmap off-thread with pre-scaling
-              const bmp = await createImageBitmap(blob, {
-                resizeQuality: 'high',
-                // We'll scale to cover eventually, but pre-scaling to viewport helps memory
-              });
+      // Phase 2: Load Remaining Frames in background
+      const remainingFrames = [];
+      for (let i = PRIORITY_FRAMES; i < FRAME_COUNT; i++) {
+        remainingFrames.push(i);
+      }
 
-              bitmapsRef.current[index] = bmp;
-              loadedCount++;
-              setLoadProgress((loadedCount / FRAME_COUNT) * 100);
-
-              // Show first frame immediately
-              if (index === 0) drawFrame(0);
-            } catch (err) {
-              console.error(`Failed to load frame ${index}:`, err);
-            }
-          })(j));
-        }
+      // Load remaining in small batches to not choke the network
+      const batchSize = 5;
+      for (let i = 0; i < remainingFrames.length; i += batchSize) {
+        const batch = remainingFrames.slice(i, i + batchSize).map(index => loadSingleFrame(index));
         await Promise.all(batch);
       }
 
@@ -74,12 +63,31 @@ export default function PikachuAntigravity() {
       setIsFullyLoaded(true);
     }
 
+    async function loadSingleFrame(index: number) {
+      try {
+        const response = await fetch(FRAME_PATH(index + 1));
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const blob = await response.blob();
+        const bmp = await createImageBitmap(blob);
+        bitmapsRef.current[index] = bmp;
+        
+        const currentLoaded = bitmapsRef.current.filter(b => b !== null).length;
+        setLoadProgress((currentLoaded / FRAME_COUNT) * 100);
+
+        // If this is the first frame, draw it immediately
+        if (index === 0 && currentFrameRef.current === 0) {
+          drawFrame(0);
+        }
+      } catch (err) {
+        console.error(`Failed to load frame ${index}:`, err);
+      }
+    }
+
     // ── Layer 2: Decoupled RAF loop ──
     function animate() {
-      // Lerp current frame toward target
       const delta = targetFrameRef.current - currentFrameRef.current;
 
-      if (Math.abs(delta) > 0.1) {
+      if (Math.abs(delta) > 0.01) {
         currentFrameRef.current += delta * LERP;
         drawFrame(Math.round(currentFrameRef.current));
       }
@@ -88,13 +96,29 @@ export default function PikachuAntigravity() {
     }
 
     function drawFrame(index: number) {
-      const bmp = bitmapsRef.current[index];
-      if (!bmp) return;
+      let bmp = bitmapsRef.current[index];
 
-      const cw = canvas!.width;
-      const ch = canvas!.height;
+      // Progressive Fallback: If requested frame isn't loaded, find the nearest available
+      if (!bmp) {
+        let nearestIdx = -1;
+        let minDiff = Infinity;
+        for (let i = 0; i < FRAME_COUNT; i++) {
+          if (bitmapsRef.current[i]) {
+            const diff = Math.abs(i - index);
+            if (diff < minDiff) {
+              minDiff = diff;
+              nearestIdx = i;
+            }
+          }
+        }
+        if (nearestIdx !== -1) bmp = bitmapsRef.current[nearestIdx];
+      }
 
-      // Cover-fit math
+      if (!bmp || !canvas) return;
+
+      const cw = canvas.width;
+      const ch = canvas.height;
+
       const scale = Math.max(cw / bmp.width, ch / bmp.height);
       const dx = (cw - bmp.width * scale) / 2;
       const dy = (ch - bmp.height * scale) / 2;
@@ -108,10 +132,8 @@ export default function PikachuAntigravity() {
       const maxScroll = SCROLL_HEIGHT - window.innerHeight;
       const progress = Math.max(0, Math.min(scrollY / maxScroll, 1));
 
-      // Update target frame only
       targetFrameRef.current = progress * (FRAME_COUNT - 1);
 
-      // UI Updates via ID (eliminates React state overhead for high-frequency events)
       const heroEl = document.getElementById("hero-text-container");
       const memeEl = document.getElementById("meme-scroll-container");
       
@@ -124,15 +146,15 @@ export default function PikachuAntigravity() {
       }
 
       if (memeEl) {
-        // Sync EXACTLY with hero text fade and transform
         memeEl.style.opacity = String(fade);
         memeEl.style.transform = `translateY(-${transform}px)`;
       }
     }
 
     function resize() {
-      canvas!.width = window.innerWidth * (window.devicePixelRatio || 1);
-      canvas!.height = window.innerHeight * (window.devicePixelRatio || 1);
+      if (!canvas) return;
+      canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+      canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
       drawFrame(Math.round(currentFrameRef.current));
     }
 
@@ -147,8 +169,6 @@ export default function PikachuAntigravity() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", resize);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-      // Cleanup GPU memory
       bitmapsRef.current.forEach(bmp => bmp?.close());
     };
   }, []);
@@ -249,7 +269,7 @@ export default function PikachuAntigravity() {
         </div>
 
         {/* Meme Side Container - Scroll Linked */}
-        {isFullyLoaded && (
+        {isInitiallyLoaded && (
           <div 
             id="meme-scroll-container" 
             className="meme-side-container"
@@ -270,7 +290,7 @@ export default function PikachuAntigravity() {
         )}
 
         {/* Loading Overlay */}
-        {!isFullyLoaded && (
+        {!isInitiallyLoaded && (
           <div
             style={{
               position: "absolute",
