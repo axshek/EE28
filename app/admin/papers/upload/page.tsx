@@ -98,9 +98,10 @@ export default function UploadPaperPage() {
                       <SelectValue placeholder="Select Semester" />
                     </SelectTrigger>
                     <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
-                      {['1st Semester','2nd Semester','3rd Semester','4th Semester','5th Semester','6th Semester','7th Semester','8th Semester'].map(s => (
-                        <SelectItem key={s} value={s}>{s}</SelectItem>
-                      ))}
+                      {['1','2','3','4','5','6','7','8'].map(s => {
+                        const label = formatSemester(s)
+                        return <SelectItem key={s} value={label}>{label}</SelectItem>
+                      })}
                     </SelectContent>
                   </Select>
                 </div>

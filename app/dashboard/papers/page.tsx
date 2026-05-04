@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getSignedUrl } from '@/app/actions/papers'
-import { Search, Download, FileText, Loader2 } from 'lucide-react'
+import { Search, Download, FileText, Loader2, AlertCircle } from 'lucide-react'
 import { PageTransition, FadeIn, HoverCard } from '@/components/animations/PageTransition'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -15,30 +15,78 @@ import { formatSemester } from '@/lib/utils'
 export default function BrowsePapersPage() {
   const [papers, setPapers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   
   // Filters
   const [searchTerm, setSearchTerm] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
   const [semesterFilter, setSemesterFilter] = useState('all')
   const [examTypeFilter, setExamTypeFilter] = useState('all')
   const [yearFilter, setYearFilter] = useState('all')
+  const [uniqueYears, setUniqueYears] = useState<string[]>([])
 
   const supabase = createClient()
 
+  // Initial fetch and filter change fetch
   useEffect(() => {
     fetchPapers()
-  }, [])
+  }, [debouncedSearch, semesterFilter, examTypeFilter, yearFilter])
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [searchTerm])
 
   const fetchPapers = async () => {
     setLoading(true)
-    const { data } = await supabase
-      .from('question_papers')
-      .select('*')
-      .order('year', { ascending: false })
-      .order('semester', { ascending: true })
-      
-    if (data) setPapers(data)
-    setLoading(false)
+    setError(null)
+    
+    try {
+      let query = supabase
+        .from('question_papers')
+        .select('*')
+        .order('year', { ascending: false })
+        .order('semester', { ascending: true })
+
+      // Apply filters
+      if (semesterFilter && semesterFilter !== 'all') {
+        // Case B: DB stores full label string like "4th Semester"
+        query = query.eq('semester', semesterFilter)
+      }
+      if (examTypeFilter !== 'all') {
+        query = query.eq('exam_type', examTypeFilter)
+      }
+      if (yearFilter !== 'all') {
+        query = query.eq('year', yearFilter)
+      }
+      if (debouncedSearch) {
+        query = query.or(`subject_name.ilike.%${debouncedSearch}%,subject_code.ilike.%${debouncedSearch}%`)
+      }
+
+      const { data, error: fetchError } = await query
+
+      if (fetchError) {
+        throw fetchError
+      }
+
+      if (data) {
+        setPapers(data)
+        // If this is the initial load (no filters), extract unique years
+        if (semesterFilter === 'all' && examTypeFilter === 'all' && yearFilter === 'all' && !debouncedSearch) {
+          const years = Array.from(new Set(data.map(p => p.year))).sort().reverse() as string[]
+          setUniqueYears(years)
+        }
+      }
+    } catch (err: any) {
+      console.error('Fetch error:', err)
+      setError(err.message || 'Failed to fetch papers')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDownload = async (paperId: string, fileUrl: string) => {
@@ -58,17 +106,7 @@ export default function BrowsePapersPage() {
     setDownloadingId(null)
   }
 
-  const filteredPapers = papers.filter(p => {
-    const matchesSearch = 
-      p.subject_name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      p.subject_code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesSem = semesterFilter !== 'all' ? p.semester === semesterFilter : true;
-    const matchesExam = examTypeFilter !== 'all' ? p.exam_type === examTypeFilter : true;
-    const matchesYear = yearFilter !== 'all' ? p.year === yearFilter : true;
-    return matchesSearch && matchesSem && matchesExam && matchesYear;
-  })
-
-  const uniqueYears = Array.from(new Set(papers.map(p => p.year))).sort().reverse()
+  // Filtered papers are now handled by the Supabase query directly
 
   return (
     <PageTransition>
@@ -97,16 +135,15 @@ export default function BrowsePapersPage() {
               <Select value={semesterFilter} onValueChange={setSemesterFilter}>
                 <SelectTrigger className="bg-black/40 border-white/10 h-12 rounded-xl w-[160px]">
                   <SelectValue placeholder="All Semesters">
-                    {semesterFilter !== 'all' ? formatSemester(semesterFilter) : 'All Semesters'}
+                    {semesterFilter !== 'all' ? semesterFilter : 'All Semesters'}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="border-white/10 rounded-xl z-[100] bg-[#0f1117]">
                   <SelectItem value="all">All Semesters</SelectItem>
-                  {[1,2,3,4,5,6,7,8].map(s => (
-                    <SelectItem key={s} value={`${s}th Semester`}>
-                      {formatSemester(`${s}th Semester`)}
-                    </SelectItem>
-                  ))}
+                  {['1','2','3','4','5','6','7','8'].map(s => {
+                    const label = formatSemester(s)
+                    return <SelectItem key={s} value={label}>{label}</SelectItem>
+                  })}
                 </SelectContent>
               </Select>
 
@@ -141,7 +178,16 @@ export default function BrowsePapersPage() {
             <Skeleton key={i} className="h-48 rounded-3xl glass-heavy" />
           ))}
         </div>
-      ) : filteredPapers.length === 0 ? (
+      ) : error ? (
+        <FadeIn delay={0.3}>
+          <div className="text-center py-20 glass rounded-3xl border border-destructive/20 bg-destructive/5">
+            <AlertCircle size={48} className="mx-auto text-destructive mb-4" strokeWidth={1} />
+            <h3 className="text-xl font-light text-white">Error loading papers</h3>
+            <p className="text-destructive font-light mt-2">{error}</p>
+            <Button variant="outline" className="mt-6 border-white/10" onClick={() => fetchPapers()}>Try Again</Button>
+          </div>
+        </FadeIn>
+      ) : papers.length === 0 ? (
         <FadeIn delay={0.3}>
           <div className="text-center py-20 glass rounded-3xl border border-white/5">
             <FileText size={48} className="mx-auto text-muted-foreground/30 mb-4" strokeWidth={1} />
@@ -151,7 +197,7 @@ export default function BrowsePapersPage() {
         </FadeIn>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPapers.map((paper, idx) => (
+          {papers.map((paper, idx) => (
             <FadeIn key={paper.id} delay={0.1 * (idx % 10)}>
               <HoverCard className="glass p-6 rounded-3xl h-full flex flex-col border border-white/5">
                 <div className="flex justify-between items-start mb-4">

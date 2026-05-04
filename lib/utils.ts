@@ -10,6 +10,14 @@ export function formatSemester(value: string): string {
     '1': '1st', '2': '2nd', '3': '3rd',
     '4': '4th', '5': '5th', '6': '6th', '7': '7th', '8': '8th',
   }
-  // Handle legacy "1th", "2th", "3th" values from old data
-  return value.replace(/^(\d+)th/, (_, n) => `${ordinals[n] ?? n + 'th'}`)
+  
+  // If it's a single digit, return "1st Semester"
+  if (ordinals[value]) {
+    return `${ordinals[value]} Semester`
+  }
+
+  // If it's already in the format "1st Semester" or "1th Semester", fix ordinals
+  return value.replace(/^(\d+)(?:st|nd|rd|th)?\s*Semester$/i, (_, n) => {
+    return `${ordinals[n] ?? n + 'th'} Semester`
+  }) || value
 }

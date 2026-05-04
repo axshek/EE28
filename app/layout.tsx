@@ -3,7 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 
 export const metadata: Metadata = {
-  title: 'TU EE Portal | Tezpur University',
+  title: 'EE | Tezpur University',
   description: 'Secure academic portal for the Department of Electrical Engineering, Tezpur University.',
 }
 

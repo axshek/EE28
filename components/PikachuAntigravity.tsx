@@ -5,7 +5,7 @@ import Link from "next/link";
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const FRAME_COUNT = 66;
-const SCROLL_HEIGHT = 6000; 
+const SCROLL_HEIGHT = 6000;
 const LERP = 0.1;
 const PRIORITY_FRAMES = 10; // Load first 10 frames immediately
 const FRAME_PATH = (n: number) => `/frames/frame_${String(n).padStart(3, "0")}.webp`;
@@ -27,6 +27,7 @@ export default function PikachuAntigravity() {
   const [loadProgress, setLoadProgress] = useState(0);
   const [isInitiallyLoaded, setIsInitiallyLoaded] = useState(false);
   const [isFullyLoaded, setIsFullyLoaded] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -71,7 +72,7 @@ export default function PikachuAntigravity() {
         const blob = await response.blob();
         const bmp = await createImageBitmap(blob);
         bitmapsRef.current[index] = bmp;
-        
+
         const currentLoaded = bitmapsRef.current.filter(b => b !== null).length;
         setLoadProgress((currentLoaded / FRAME_COUNT) * 100);
 
@@ -137,12 +138,35 @@ export default function PikachuAntigravity() {
 
       const cw = canvas.width;
       const ch = canvas.height;
+      const dw = bmp.width;
+      const dh = bmp.height;
 
-      const scale = Math.max(cw / bmp.width, ch / bmp.height);
-      const dx = (cw - bmp.width * scale) / 2;
-      const dy = (ch - bmp.height * scale) / 2;
+      const scale = Math.max(cw / dw, ch / dh);
+      const imgW = dw * scale;
+      const imgH = dh * scale;
 
-      ctx!.drawImage(bmp, dx, dy, bmp.width * scale, bmp.height * scale);
+      let dx, dy;
+
+      // Focal Point Logic
+      const isDesktop = window.innerWidth >= 1024;
+      
+      if (!isDesktop) {
+        // Tablet & Mobile Focal Point (Adjusted to Pikachu's face)
+        const focalX = 0.50; 
+        const focalY = 0.22; 
+        
+        const rawDx = (cw - imgW) * focalX;
+        const rawDy = (ch - imgH) * focalY;
+        
+        dx = Math.min(0, Math.max(cw - imgW, rawDx));
+        dy = Math.min(0, Math.max(ch - imgH, rawDy));
+      } else {
+        // Desktop Centered Logic (Untouched)
+        dx = (cw - imgW) / 2;
+        dy = (ch - imgH) / 2;
+      }
+
+      ctx!.drawImage(bmp, dx, dy, imgW, imgH);
     }
 
     // ── Layer 3: Optimized Scroll Handler ──
@@ -157,7 +181,9 @@ export default function PikachuAntigravity() {
 
     function resize() {
       if (!canvas) return;
-      canvas.width = window.innerWidth * (window.devicePixelRatio || 1);
+      const ww = window.innerWidth;
+      setWindowWidth(ww);
+      canvas.width = ww * (window.devicePixelRatio || 1);
       canvas.height = window.innerHeight * (window.devicePixelRatio || 1);
       drawFrame(Math.round(currentFrameRef.current));
     }
@@ -219,6 +245,9 @@ export default function PikachuAntigravity() {
             inset: 0,
             zIndex: 2,
             pointerEvents: "none",
+            background: windowWidth >= 1024
+              ? 'linear-gradient(to right, rgba(8,8,8,0.92) 0%, rgba(8,8,8,0.65) 38%, rgba(8,8,8,0.1) 58%, transparent 100%)'
+              : 'linear-gradient(to top, rgba(8,8,8,0.97) 0%, rgba(8,8,8,0.6) 55%, transparent 100%)',
           }}
         />
 
@@ -232,13 +261,16 @@ export default function PikachuAntigravity() {
             zIndex: 10,
             display: "flex",
             flexDirection: "column",
-            justifyContent: "center",
+            justifyContent: windowWidth >= 1024 ? 'center' : 'flex-end',
+            paddingBottom: windowWidth >= 1024 ? '60px' : '80px',
+            paddingLeft: windowWidth >= 1024 ? '' : 'clamp(20px, 5vw, 40px)',
+            paddingRight: windowWidth >= 1024 ? '' : 'clamp(20px, 5vw, 40px)',
             pointerEvents: "none",
             willChange: "transform, opacity",
             transform: "translate3d(0,0,0)",
           }}
         >
-          <div className="hero-content">
+          <div className="hero-content" style={{ maxWidth: windowWidth >= 1024 ? '50%' : '100%', pointerEvents: 'auto' }}>
             <p className="eyebrow">Tezpur University · Dept. of EE</p>
             <h1 className="headline">
               ELECTRICAL
@@ -251,13 +283,49 @@ export default function PikachuAntigravity() {
               An easy academic portal for Electrical Engineering students at Tezpur University.
             </p>
             <div className="cta-group">
-              <Link href="/register" className="btn btn-primary">Create Account</Link>
-              <Link href="/login" className="btn btn-secondary">Sign In</Link>
+              <Link 
+                href="/register" 
+                style={{
+                  background: '#FFE500',
+                  color: '#000',
+                  borderRadius: '50px',
+                  padding: '13px 28px',
+                  fontWeight: 700,
+                  textDecoration: 'none',
+                  fontSize: '13px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  border: 'none',
+                }}
+              >
+                Create Account
+              </Link>
+              <Link 
+                href="/login" 
+                style={{
+                  background: 'transparent',
+                  color: '#fff',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  borderRadius: '50px',
+                  padding: '13px 28px',
+                  textDecoration: 'none',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                Sign In
+              </Link>
             </div>
             <div style={{ marginTop: '20px', opacity: 0.4 }}>
-              <Link 
-                href="/admin-login" 
-                style={{ 
+              <Link
+                href="/admin-login"
+                style={{
                   fontFamily: "-apple-system, 'SF Pro Text', system-ui, sans-serif",
                   fontSize: '11px',
                   color: 'white',
@@ -276,14 +344,14 @@ export default function PikachuAntigravity() {
 
         {/* Meme Side Container - Scroll Linked */}
         {isInitiallyLoaded && (
-          <div 
-            id="meme-scroll-container" 
+          <div
+            id="meme-scroll-container"
             className="meme-side-container"
             style={{ willChange: "transform, opacity" }}
           >
-            <a 
-              href="https://www.instagram.com/tezu.electrical/" 
-              target="_blank" 
+            <a
+              href="https://www.instagram.com/tezu.electrical/"
+              target="_blank"
               rel="noopener noreferrer"
               className="meme-floating-icon"
               style={{ transform: "translateZ(0)" }}
@@ -509,7 +577,7 @@ export default function PikachuAntigravity() {
           text-transform: uppercase;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 1024px) {
           .responsive-gradient {
             background: linear-gradient(to top, rgba(8,8,8,1) 0%, rgba(8,8,8,0.7) 40%, transparent 100%);
           }
